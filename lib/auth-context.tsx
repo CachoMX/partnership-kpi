@@ -32,6 +32,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         setLoading(false)
       }
+    }).catch((error) => {
+      console.error('Error getting session:', error)
+      setLoading(false)
     })
 
     // Listen for auth changes
@@ -44,7 +47,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      try {
+        subscription.unsubscribe()
+      } catch (error) {
+        console.error('Error unsubscribing:', error)
+      }
+    }
   }, [])
 
   const fetchUserRole = async (authUser: User) => {
