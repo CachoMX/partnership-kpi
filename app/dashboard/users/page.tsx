@@ -41,7 +41,7 @@ export default function UsersManagementPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [editingUser, setEditingUser] = useState<UserData | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [editForm, setEditForm] = useState({ name: "", email: "", role: "" })
+  const [editForm, setEditForm] = useState({ name: "", email: "", role: "", password: "" })
   const [deletingUser, setDeletingUser] = useState<UserData | null>(null)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
@@ -100,7 +100,7 @@ export default function UsersManagementPage() {
 
   const handleEditClick = (user: UserData) => {
     setEditingUser(user)
-    setEditForm({ name: user.name, email: user.email, role: user.role })
+    setEditForm({ name: user.name, email: user.email, role: user.role, password: "" })
     setIsEditDialogOpen(true)
   }
 
@@ -108,15 +108,22 @@ export default function UsersManagementPage() {
     if (!editingUser) return
 
     try {
+      const payload: any = {
+        userId: editingUser.id,
+        name: editForm.name,
+        email: editForm.email,
+        role: editForm.role
+      }
+
+      // Only include password if it's been changed
+      if (editForm.password && editForm.password.trim() !== "") {
+        payload.password = editForm.password
+      }
+
       const response = await fetch('/api/users/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: editingUser.id,
-          name: editForm.name,
-          email: editForm.email,
-          role: editForm.role
-        })
+        body: JSON.stringify(payload)
       })
 
       if (!response.ok) throw new Error('Failed to update user')
@@ -348,6 +355,19 @@ export default function UsersManagementPage() {
                   <SelectItem value="admin">Admin</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-password">New Password (optional)</Label>
+              <Input
+                id="edit-password"
+                type="password"
+                placeholder="Leave blank to keep current password"
+                value={editForm.password}
+                onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+              />
+              <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                Enter a new password to change it, or leave blank to keep the current password.
+              </p>
             </div>
           </div>
           <DialogFooter>

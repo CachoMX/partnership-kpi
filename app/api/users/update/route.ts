@@ -13,16 +13,24 @@ export async function POST(request: NextRequest) {
   })
 
   try {
-    const { userId, name, email, role } = await request.json()
+    const { userId, name, email, role, password } = await request.json()
 
     if (!userId || !name || !email || !role) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // Update auth user email if changed
+    // Prepare auth update payload
+    const authUpdatePayload: any = { email }
+
+    // Only update password if provided
+    if (password && password.trim() !== "") {
+      authUpdatePayload.password = password
+    }
+
+    // Update auth user email and password if changed
     const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(
       userId,
-      { email }
+      authUpdatePayload
     )
 
     if (authError) {
