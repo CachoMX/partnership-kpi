@@ -2,30 +2,14 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/auth-context"
 
 export default function HomePage() {
-  const { user, loading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    if (!loading) {
-      if (user) {
-        // Redirect based on role
-        if (user.role === 'admin') {
-          router.push('/dashboard')
-        } else if (user.role === 'closer') {
-          router.push('/dashboard/closer')
-        } else if (user.role === 'setter') {
-          router.push('/dashboard/setter')
-        } else {
-          router.push('/dashboard')
-        }
-      } else {
-        router.push('/login')
-      }
-    }
-  }, [user, loading, router])
+    // Simply redirect to login on homepage
+    router.push('/login')
+  }, [router])
 
   return (
     <div style={{
