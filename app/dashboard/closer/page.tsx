@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { LogOut, TrendingUp, Users, DollarSign, Target, Award, Calendar, RefreshCw } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { useAuth } from "@/lib/auth-context"
 import { toast } from "sonner"
 import Link from "next/link"
@@ -196,6 +197,7 @@ export default function CloserDashboard() {
                   + Add Call
                 </Button>
               </Link>
+              <ThemeToggle />
               <Button onClick={handleSignOut} className="btn btn-secondary">
                 <LogOut className="w-5 h-5" />
                 Sign Out

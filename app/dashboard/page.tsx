@@ -10,6 +10,7 @@ import { AddCallForm } from "@/components/add-call-form"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { RevenueTrendChart } from "@/components/revenue-trend-chart"
 import { AdminUserManagement } from "@/components/admin-user-management"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { useAuth } from "@/lib/auth-context"
 import { toast } from "sonner"
 
@@ -247,6 +248,7 @@ export default function Dashboard() {
                   />
                 </DialogContent>
               </Dialog>
+              <ThemeToggle />
               <Button
                 onClick={handleSignOut}
                 variant="outline"
