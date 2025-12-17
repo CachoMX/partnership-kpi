@@ -607,7 +607,7 @@ textarea::placeholder {
 
 .stat-value {
   font-size: var(--text-3xl);
-  font-weight: var(--font-bold);
+  font-weight: var(--font-medium);
   color: var(--color-accent);
 }
 
