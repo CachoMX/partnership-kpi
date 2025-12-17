@@ -1,0 +1,115 @@
+/* ============================================
+   THEME: Mint Green
+   Fresh, growth-focused aesthetic
+   ============================================ */
+
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Backgrounds */
+  --color-bg-primary: #171a2a;
+  --color-bg-secondary: #101222;
+  --color-bg-card: #212437;
+  --color-bg-elevated: #2f3246;
+  --color-bg-hover: #333647;
+
+  /* Borders */
+  --color-border: #2f3246;
+  --color-border-strong: #3d4056;
+
+  /* Text */
+  --color-text-primary: #edeff8;
+  --color-text-secondary: #727795;
+  --color-text-muted: #afafc5;
+  --color-text-accent: #ced0dd;
+
+  /* Accent - Mint Green */
+  --color-accent: #50f5ac;
+  --color-accent-hover: #3dd994;
+  --color-accent-secondary: #34d399;
+  --color-accent-glow: rgba(80, 245, 172, 0.4);
+  --color-accent-subtle: rgba(80, 245, 172, 0.1);
+
+  /* Semantic Colors */
+  --color-success: #50f5ac;
+  --color-success-subtle: rgba(80, 245, 172, 0.15);
+  --color-danger: #ee3556;
+  --color-danger-subtle: rgba(238, 53, 86, 0.15);
+  --color-danger-glow: rgba(238, 53, 86, 0.4);
+  --color-warning: #ecaa2c;
+  --color-warning-subtle: rgba(236, 170, 44, 0.15);
+  --color-info: #556bd1;
+
+  /* Buttons */
+  --color-btn-primary-bg: #50f5ac;
+  --color-btn-primary-text: #101222;
+  --color-btn-secondary-bg: #212437;
+  --color-btn-secondary-text: #edeff8;
+  --color-btn-secondary-border: #3d4056;
+
+  /* States */
+  --color-disabled: #575b76;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 20px var(--color-accent-glow);
+  --shadow-glow-sm: 0 0 10px var(--color-accent-glow);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* Backgrounds */
+  --color-bg-primary: #f5f7fa;
+  --color-bg-secondary: #ffffff;
+  --color-bg-card: #ffffff;
+  --color-bg-elevated: #f0f2f5;
+  --color-bg-hover: #e8eaed;
+
+  /* Borders */
+  --color-border: #e0e3e8;
+  --color-border-strong: #c8ccd4;
+
+  /* Text */
+  --color-text-primary: #1a1d2e;
+  --color-text-secondary: #5a5f7a;
+  --color-text-muted: #7a7f95;
+  --color-text-accent: #3a3f55;
+
+  /* Accent - Darker for contrast */
+  --color-accent: #00b871;
+  --color-accent-hover: #009e62;
+  --color-accent-secondary: #059669;
+  --color-accent-glow: rgba(0, 184, 113, 0.3);
+  --color-accent-subtle: rgba(0, 184, 113, 0.08);
+
+  /* Semantic */
+  --color-success: #00b871;
+  --color-success-subtle: rgba(0, 184, 113, 0.1);
+  --color-danger: #dc2626;
+  --color-danger-subtle: rgba(220, 38, 38, 0.1);
+  --color-danger-glow: rgba(220, 38, 38, 0.3);
+  --color-warning: #d97706;
+  --color-warning-subtle: rgba(217, 119, 6, 0.1);
+  --color-info: #4f5bd5;
+
+  /* Buttons */
+  --color-btn-primary-bg: #00b871;
+  --color-btn-primary-text: #ffffff;
+  --color-btn-secondary-bg: #ffffff;
+  --color-btn-secondary-text: #1a1d2e;
+  --color-btn-secondary-border: #c8ccd4;
+
+  /* States */
+  --color-disabled: #9ca3af;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-glow: 0 0 20px var(--color-accent-glow);
+  --shadow-glow-sm: 0 0 10px var(--color-accent-glow);
+}

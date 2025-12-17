@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir /b c:Projectspartnership-kpi)",
+      "Read(//c/Users/uriel/Downloads/**)",
+      "Bash(npm install:*)",
+      "Bash(npm run import-csv:*)",
+      "Bash(npm run dev:*)",
+      "Bash(timeout 3 npm run dev)",
+      "Bash(npm run create-demo-users:*)",
+      "Bash(npx tsx:*)",
+      "Bash(npm run create-all-users:*)",
+      "Bash(taskkill:*)",
+      "Bash(npx kill-port:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

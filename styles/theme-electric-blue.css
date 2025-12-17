@@ -1,0 +1,115 @@
+/* ============================================
+   THEME: Electric Blue
+   Modern tech-forward aesthetic
+   ============================================ */
+
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Backgrounds */
+  --color-bg-primary: #0a0e1a;
+  --color-bg-secondary: #060912;
+  --color-bg-card: #111827;
+  --color-bg-elevated: #1e293b;
+  --color-bg-hover: #273448;
+
+  /* Borders */
+  --color-border: #1e293b;
+  --color-border-strong: #334155;
+
+  /* Text */
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted: #64748b;
+  --color-text-accent: #cbd5e1;
+
+  /* Accent - Electric Blue */
+  --color-accent: #00d4ff;
+  --color-accent-hover: #00b8e6;
+  --color-accent-secondary: #a855f7;
+  --color-accent-glow: rgba(0, 212, 255, 0.4);
+  --color-accent-subtle: rgba(0, 212, 255, 0.1);
+
+  /* Semantic Colors */
+  --color-success: #10b981;
+  --color-success-subtle: rgba(16, 185, 129, 0.15);
+  --color-danger: #ef4444;
+  --color-danger-subtle: rgba(239, 68, 68, 0.15);
+  --color-danger-glow: rgba(239, 68, 68, 0.4);
+  --color-warning: #f59e0b;
+  --color-warning-subtle: rgba(245, 158, 11, 0.15);
+  --color-info: #00d4ff;
+
+  /* Buttons */
+  --color-btn-primary-bg: #00d4ff;
+  --color-btn-primary-text: #0a0e1a;
+  --color-btn-secondary-bg: #111827;
+  --color-btn-secondary-text: #f1f5f9;
+  --color-btn-secondary-border: #334155;
+
+  /* States */
+  --color-disabled: #475569;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px var(--color-accent-glow);
+  --shadow-glow-sm: 0 0 10px var(--color-accent-glow);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* Backgrounds */
+  --color-bg-primary: #f8fafc;
+  --color-bg-secondary: #ffffff;
+  --color-bg-card: #ffffff;
+  --color-bg-elevated: #f1f5f9;
+  --color-bg-hover: #e2e8f0;
+
+  /* Borders */
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+
+  /* Text */
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748b;
+  --color-text-accent: #1e293b;
+
+  /* Accent - Darker for contrast */
+  --color-accent: #0891b2;
+  --color-accent-hover: #0e7490;
+  --color-accent-secondary: #7c3aed;
+  --color-accent-glow: rgba(8, 145, 178, 0.3);
+  --color-accent-subtle: rgba(8, 145, 178, 0.08);
+
+  /* Semantic */
+  --color-success: #059669;
+  --color-success-subtle: rgba(5, 150, 105, 0.1);
+  --color-danger: #dc2626;
+  --color-danger-subtle: rgba(220, 38, 38, 0.1);
+  --color-danger-glow: rgba(220, 38, 38, 0.3);
+  --color-warning: #d97706;
+  --color-warning-subtle: rgba(217, 119, 6, 0.1);
+  --color-info: #0891b2;
+
+  /* Buttons */
+  --color-btn-primary-bg: #0891b2;
+  --color-btn-primary-text: #ffffff;
+  --color-btn-secondary-bg: #ffffff;
+  --color-btn-secondary-text: #0f172a;
+  --color-btn-secondary-border: #cbd5e1;
+
+  /* States */
+  --color-disabled: #94a3b8;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.12);
+  --shadow-glow: 0 0 20px var(--color-accent-glow);
+  --shadow-glow-sm: 0 0 10px var(--color-accent-glow);
+}
