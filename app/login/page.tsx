@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { useAuth } from "@/lib/auth-context"
 import { toast } from "sonner"
 import { LogIn, Loader2 } from "lucide-react"
@@ -54,19 +55,30 @@ export default function LoginPage() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: 'var(--space-6)'
+      padding: 'var(--space-6)',
+      position: 'relative'
     }}>
-      <Card style={{ width: '100%', maxWidth: '440px' }}>
-        <CardHeader style={{ textAlign: 'center' }}>
+      {/* Theme Toggle in top-right corner */}
+      <div style={{ position: 'absolute', top: 'var(--space-4)', right: 'var(--space-4)' }}>
+        <ThemeToggle />
+      </div>
+
+      <Card style={{
+        width: '100%',
+        maxWidth: '440px',
+        backgroundColor: 'var(--color-bg-card)',
+        border: '1px solid var(--color-border)'
+      }}>
+        <CardHeader style={{ textAlign: 'center', borderBottom: '1px solid var(--color-border)' }}>
           <div className="badge-live" style={{ margin: '0 auto var(--space-4)' }}>
             <span>CLOSERS KPI</span>
           </div>
-          <CardTitle className="text-h1">Sign In</CardTitle>
+          <CardTitle className="text-h1" style={{ color: 'var(--color-text-primary)' }}>Sign In</CardTitle>
           <CardDescription className="text-small" style={{ color: 'var(--color-text-muted)' }}>
             Enter your credentials to access your dashboard
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent style={{ paddingTop: 'var(--space-6)' }}>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="form-group">
               <Label htmlFor="email" className="form-label">Email</Label>
