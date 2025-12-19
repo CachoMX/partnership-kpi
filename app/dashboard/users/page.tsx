@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { LogOut, Search, Edit2, Trash2, UserPlus, ArrowLeft } from "lucide-react"
+import { AdminUserManagement } from "@/components/admin-user-management"
 import { useAuth } from "@/lib/auth-context"
 import { toast } from "sonner"
 import {
@@ -201,6 +202,7 @@ export default function UsersManagementPage() {
               </div>
             </div>
             <div className="flex gap-2">
+              <AdminUserManagement onUserAdded={fetchUsers} />
               <Button onClick={() => router.push('/dashboard')} className="btn btn-secondary">
                 Dashboard
               </Button>
