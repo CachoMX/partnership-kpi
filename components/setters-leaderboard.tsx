@@ -32,28 +32,28 @@ export function SettersLeaderboard({ setters }: SettersLeaderboardProps) {
   return (
     <Card className="bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-white">Setters Leaderboard</CardTitle>
+        <CardTitle className="text-2xl font-medium text-white">Setters Leaderboard</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="rounded-md border border-gray-700">
           <Table>
             <TableHeader>
               <TableRow className="border-gray-700 hover:bg-gray-800/50">
-                <TableHead className="text-gray-400 font-semibold">#</TableHead>
-                <TableHead className="text-gray-400 font-semibold">Setter</TableHead>
-                <TableHead className="text-gray-400 font-semibold text-right">Booked</TableHead>
-                <TableHead className="text-gray-400 font-semibold text-right">Shows</TableHead>
-                <TableHead className="text-gray-400 font-semibold text-right">Show Rate</TableHead>
-                <TableHead className="text-gray-400 font-semibold text-right">Closes</TableHead>
-                <TableHead className="text-gray-400 font-semibold text-right">Close Rate</TableHead>
-                <TableHead className="text-gray-400 font-semibold text-right">Revenue Gen.</TableHead>
+                <TableHead className="text-gray-400">#</TableHead>
+                <TableHead className="text-gray-400">Setter</TableHead>
+                <TableHead className="text-gray-400 text-right">Booked</TableHead>
+                <TableHead className="text-gray-400 text-right">Shows</TableHead>
+                <TableHead className="text-gray-400 text-right">Show Rate</TableHead>
+                <TableHead className="text-gray-400 text-right">Closes</TableHead>
+                <TableHead className="text-gray-400 text-right">Close Rate</TableHead>
+                <TableHead className="text-gray-400 text-right">Revenue Gen.</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {sortedSetters.map((setter, index) => (
                 <TableRow key={setter.id} className="border-gray-700 hover:bg-gray-800/50">
-                  <TableCell className="font-medium text-gray-300">{index + 1}.</TableCell>
-                  <TableCell className="font-medium text-white">{setter.name}</TableCell>
+                  <TableCell className="text-gray-300">{index + 1}.</TableCell>
+                  <TableCell className="text-white">{setter.name}</TableCell>
                   <TableCell className="text-right text-white">{setter.total_calls_booked}</TableCell>
                   <TableCell className="text-right text-white">{setter.total_shows}</TableCell>
                   <TableCell className="text-right text-white">
@@ -63,7 +63,7 @@ export function SettersLeaderboard({ setters }: SettersLeaderboardProps) {
                   <TableCell className="text-right text-white">
                     {setter.close_rate.toFixed(1)}%
                   </TableCell>
-                  <TableCell className="text-right font-semibold text-white">
+                  <TableCell className="text-right text-white">
                     ${setter.total_revenue_generated.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                   </TableCell>
                 </TableRow>

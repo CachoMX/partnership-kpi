@@ -45,26 +45,26 @@ export function ClosersLeaderboard({ closers }: ClosersLeaderboardProps) {
   return (
     <Card className="bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-white">Closers Leaderboard</CardTitle>
+        <CardTitle className="text-2xl font-medium text-white">Closers Leaderboard</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="rounded-md border border-gray-700">
           <Table>
             <TableHeader>
               <TableRow className="border-gray-700 hover:bg-gray-800/50">
-                <TableHead className="text-gray-400 font-semibold">#</TableHead>
-                <TableHead className="text-gray-400 font-semibold">Closer</TableHead>
-                <TableHead className="text-gray-400 font-semibold text-right">Closed</TableHead>
-                <TableHead className="text-gray-400 font-semibold text-right">AOV</TableHead>
-                <TableHead className="text-gray-400 font-semibold text-right">Rev</TableHead>
-                <TableHead className="text-gray-400 font-semibold text-right">Cash Collected</TableHead>
+                <TableHead className="text-gray-400">#</TableHead>
+                <TableHead className="text-gray-400">Closer</TableHead>
+                <TableHead className="text-gray-400 text-right">Closed</TableHead>
+                <TableHead className="text-gray-400 text-right">AOV</TableHead>
+                <TableHead className="text-gray-400 text-right">Rev</TableHead>
+                <TableHead className="text-gray-400 text-right">Cash Collected</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {closersWithStats.map((closer, index) => (
                 <TableRow key={closer.id} className="border-gray-700 hover:bg-gray-800/50">
-                  <TableCell className="font-medium text-gray-300">{index + 1}.</TableCell>
-                  <TableCell className="font-medium text-white">{closer.name}</TableCell>
+                  <TableCell className="text-gray-300">{index + 1}.</TableCell>
+                  <TableCell className="text-white">{closer.name}</TableCell>
                   <TableCell className="text-right text-white">{closer.closed_deals}</TableCell>
                   <TableCell className="text-right text-white">
                     ${closer.aov.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
@@ -72,7 +72,7 @@ export function ClosersLeaderboard({ closers }: ClosersLeaderboardProps) {
                   <TableCell className="text-right text-white">
                     ${closer.total_revenue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                   </TableCell>
-                  <TableCell className="text-right font-semibold text-white">
+                  <TableCell className="text-right text-white">
                     ${closer.total_cash_collected.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                   </TableCell>
                 </TableRow>
