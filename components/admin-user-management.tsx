@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Plus, UserPlus } from "lucide-react"
 import { toast } from "sonner"
-import { useAuth } from "@/lib/auth-context"
 
 interface UserManagementProps {
   onUserAdded?: () => void
@@ -17,7 +16,6 @@ interface UserManagementProps {
 export function AdminUserManagement({ onUserAdded }: UserManagementProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const { signUp } = useAuth()
 
   const [formData, setFormData] = useState({
     name: '',
@@ -31,7 +29,18 @@ export function AdminUserManagement({ onUserAdded }: UserManagementProps) {
     setLoading(true)
 
     try {
-      await signUp(formData.email, formData.password, formData.name, formData.role)
+      const response = await fetch('/api/users/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to add user')
+      }
 
       toast.success(`${formData.role.charAt(0).toUpperCase() + formData.role.slice(1)} added successfully!`)
 
