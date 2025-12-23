@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, RefreshCw, TrendingUp, Users, DollarSign, Target, Award, Zap, LogOut, UserCog } from "lucide-react"
+import { Plus, RefreshCw, TrendingUp, Users, DollarSign, Target, Award, Zap, LogOut, UserCog, Receipt } from "lucide-react"
 import { DateRangeFilter } from "@/components/date-range-filter"
 import Link from "next/link"
 import { AddCallForm } from "@/components/add-call-form"
@@ -216,6 +216,12 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex gap-2">
+              <Link href="/dashboard/sales">
+                <Button className="btn btn-secondary">
+                  <Receipt className="w-5 h-5" />
+                  Sales
+                </Button>
+              </Link>
               <Link href="/dashboard/users">
                 <Button className="btn btn-secondary">
                   <UserCog className="w-5 h-5" />
