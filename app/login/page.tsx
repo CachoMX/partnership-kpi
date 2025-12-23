@@ -20,7 +20,7 @@ export default function LoginPage() {
 
   // Redirect when user is logged in
   useEffect(() => {
-    if (!authLoading && user) {
+    if (!authLoading && user && user.role) {
       // Redirect based on role
       if (user.role === 'admin') {
         router.push('/dashboard')
@@ -28,9 +28,8 @@ export default function LoginPage() {
         router.push('/dashboard/closer')
       } else if (user.role === 'setter') {
         router.push('/dashboard/setter')
-      } else {
-        router.push('/')
       }
+      // If no role, stay on login page (don't redirect to avoid loop)
     }
   }, [user, authLoading, router])
 
@@ -126,19 +125,6 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div style={{
-            marginTop: 'var(--space-6)',
-            textAlign: 'center',
-            fontSize: 'var(--text-sm)',
-            color: 'var(--color-text-muted)'
-          }}>
-            <p>Demo Accounts:</p>
-            <p style={{ marginTop: 'var(--space-2)' }}>
-              Admin: admin@example.com / admin123<br/>
-              Closer: closer@example.com / closer123<br/>
-              Setter: setter@example.com / setter123
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>

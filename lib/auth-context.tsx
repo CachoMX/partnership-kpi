@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await response.json()
 
       if (!data.role) {
-        console.error('No role found for user')
+        // User exists in auth but has no role assigned yet
         setUser(authUser as AuthUser)
         setLoading(false)
         return
@@ -102,7 +102,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) throw error
   }
 
-  const signUp = async (email: string, password: string, name: string, role: 'admin' | 'closer' | 'setter') => {
+  const signUp = async (rawEmail: string, password: string, name: string, role: 'admin' | 'closer' | 'setter') => {
+    // Normalize email to lowercase
+    const email = rawEmail.toLowerCase().trim()
+
     // Create auth user
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -134,9 +137,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
+    // Clear user state first to prevent redirects
     setUser(null)
+
+    try {
+      await supabase.auth.signOut({ scope: 'local' })
+    } catch (error) {
+      console.error('Error during signOut:', error)
+      // Clear Supabase storage manually if signOut fails
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('sb-tavxhyiuxzvvjylhedir-auth-token')
+        // Clear any other supabase keys
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('sb-')) {
+            localStorage.removeItem(key)
+          }
+        })
+      }
+    }
   }
 
   return (

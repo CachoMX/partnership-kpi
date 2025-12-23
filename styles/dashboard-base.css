@@ -742,3 +742,84 @@ textarea::placeholder {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-accent);
 }
+
+/* ============================================
+   CALENDAR OVERRIDES
+   ============================================ */
+
+/* Calendar container */
+[data-slot="calendar"] {
+  background-color: transparent !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* Calendar buttons (prev/next) */
+[data-slot="calendar"] button {
+  color: var(--color-text-primary) !important;
+  background-color: transparent !important;
+}
+
+[data-slot="calendar"] button:hover {
+  background-color: var(--color-bg-tertiary) !important;
+}
+
+/* Calendar weekday headers */
+.rdp-weekday {
+  color: var(--color-text-muted) !important;
+}
+
+/* Calendar day cells */
+.rdp-day button,
+.rdp-day_button {
+  color: var(--color-text-primary) !important;
+}
+
+.rdp-day button:hover,
+.rdp-day_button:hover {
+  background-color: var(--color-bg-tertiary) !important;
+}
+
+/* Selected day */
+.rdp-day[data-selected] button,
+[data-selected-single="true"] {
+  background-color: var(--color-accent) !important;
+  color: white !important;
+}
+
+/* Today indicator */
+.rdp-day_today button,
+.rdp-today button {
+  background-color: var(--color-accent-subtle) !important;
+  color: var(--color-accent) !important;
+}
+
+/* Outside days (from other months) */
+.rdp-day_outside button,
+.rdp-outside button {
+  color: var(--color-text-muted) !important;
+  opacity: 0.5;
+}
+
+/* Disabled days */
+.rdp-day_disabled button,
+.rdp-disabled button {
+  color: var(--color-text-muted) !important;
+  opacity: 0.3;
+}
+
+/* Caption/month label */
+.rdp-caption_label,
+.rdp-month_caption {
+  color: var(--color-text-primary) !important;
+}
+
+/* Navigation buttons */
+.rdp-button_previous,
+.rdp-button_next {
+  color: var(--color-text-primary) !important;
+}
+
+.rdp-button_previous:hover,
+.rdp-button_next:hover {
+  background-color: var(--color-bg-tertiary) !important;
+}

@@ -108,6 +108,12 @@ export default function UsersManagementPage() {
   const handleEditSave = async () => {
     if (!editingUser) return
 
+    // Validate password length if provided
+    if (editForm.password && editForm.password.trim() !== "" && editForm.password.length < 6) {
+      toast.error('Password must be at least 6 characters')
+      return
+    }
+
     try {
       const payload: any = {
         userId: editingUser.id,
@@ -279,11 +285,26 @@ export default function UsersManagementPage() {
                     <td style={{ padding: 'var(--space-3)', color: 'var(--color-text-primary)' }}>{u.name}</td>
                     <td style={{ padding: 'var(--space-3)', color: 'var(--color-text-secondary)' }}>{u.email}</td>
                     <td style={{ padding: 'var(--space-3)' }}>
-                      <span className="badge-live" style={{
-                        backgroundColor: u.role === 'admin' ? 'var(--color-danger-subtle)' : u.role === 'closer' ? 'var(--color-accent-subtle)' : 'var(--color-info)',
-                        color: u.role === 'admin' ? 'var(--color-danger)' : u.role === 'closer' ? 'var(--color-accent)' : 'var(--color-text-primary)'
+                      <span style={{
+                        display: 'inline-block',
+                        padding: '4px 12px',
+                        borderRadius: '9999px',
+                        fontSize: 'var(--text-xs)',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        backgroundColor: u.role === 'admin'
+                          ? 'rgba(239, 68, 68, 0.15)'
+                          : u.role === 'closer'
+                            ? 'rgba(16, 185, 129, 0.15)'
+                            : 'rgba(59, 130, 246, 0.15)',
+                        color: u.role === 'admin'
+                          ? '#ef4444'
+                          : u.role === 'closer'
+                            ? '#10b981'
+                            : '#3b82f6'
                       }}>
-                        {u.role.toUpperCase()}
+                        {u.role}
                       </span>
                     </td>
                     <td style={{ padding: 'var(--space-3)', color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Plus, RefreshCw, TrendingUp, Users, DollarSign, Target, Award, Zap, LogOut, UserCog } from "lucide-react"
+import { DateRangeFilter } from "@/components/date-range-filter"
 import Link from "next/link"
 import { AddCallForm } from "@/components/add-call-form"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -52,18 +53,22 @@ export default function Dashboard() {
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
 
-  const fetchData = async () => {
+  const fetchData = async (fromDate?: string, toDate?: string) => {
+    // Use passed parameters or fall back to state
+    const from = fromDate ?? dateFrom
+    const to = toDate ?? dateTo
+
     setLoading(true)
     try {
       // Build query params for date filtering
       const params = new URLSearchParams()
-      if (dateFrom) params.append('dateFrom', dateFrom)
-      if (dateTo) params.append('dateTo', dateTo)
+      if (from) params.append('dateFrom', from)
+      if (to) params.append('dateTo', to)
       const queryString = params.toString() ? `?${params.toString()}` : ''
 
       // Use stats endpoints when filtering by date, otherwise use regular endpoints
-      const closersEndpoint = (dateFrom || dateTo) ? `/api/closers/stats${queryString}` : '/api/closers'
-      const settersEndpoint = (dateFrom || dateTo) ? `/api/setters/stats${queryString}` : '/api/setters'
+      const closersEndpoint = (from || to) ? `/api/closers/stats${queryString}` : '/api/closers'
+      const settersEndpoint = (from || to) ? `/api/setters/stats${queryString}` : '/api/setters'
 
       const [closersRes, settersRes] = await Promise.all([
         fetch(closersEndpoint),
@@ -292,67 +297,15 @@ export default function Dashboard() {
           </div>
 
           {/* Date Range Picker */}
-          <div style={{
-            display: 'flex',
-            gap: 'var(--space-2)',
-            alignItems: 'center',
-            backgroundColor: 'var(--color-bg-card)',
-            padding: 'var(--space-3)',
-            borderRadius: '8px',
-            border: '1px solid var(--color-border)',
-            flex: 1
-          }}>
-            <span style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)', whiteSpace: 'nowrap' }}>
-              From:
-            </span>
-            <Input
-              type="date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              style={{
-                width: '150px',
-                backgroundColor: 'var(--color-bg-secondary)',
-                border: '1px solid var(--color-border)',
-                color: 'var(--color-text-primary)',
-                padding: 'var(--space-2)'
-              }}
-            />
-            <span style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)', whiteSpace: 'nowrap' }}>
-              To:
-            </span>
-            <Input
-              type="date"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              style={{
-                width: '150px',
-                backgroundColor: 'var(--color-bg-secondary)',
-                border: '1px solid var(--color-border)',
-                color: 'var(--color-text-primary)',
-                padding: 'var(--space-2)'
-              }}
-            />
-            <Button
-              onClick={fetchData}
-              size="sm"
-              className="btn btn-primary"
-            >
-              Apply
-            </Button>
-            {(dateFrom || dateTo) && (
-              <Button
-                onClick={() => {
-                  setDateFrom('')
-                  setDateTo('')
-                  fetchData()
-                }}
-                size="sm"
-                className="btn btn-secondary"
-              >
-                Clear
-              </Button>
-            )}
-          </div>
+          <DateRangeFilter
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+            onDateChange={(from, to) => {
+              setDateFrom(from)
+              setDateTo(to)
+            }}
+            onApply={(from, to) => fetchData(from, to)}
+          />
         </div>
 
         {/* KPI Cards Grid */}

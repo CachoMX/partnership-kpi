@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { LogOut, TrendingUp, Users, DollarSign, Target, Award, Calendar } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useAuth } from "@/lib/auth-context"
+import { DateRangeFilter } from "@/components/date-range-filter"
 import { toast } from "sonner"
 import Link from "next/link"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
@@ -66,18 +66,21 @@ export default function SetterDashboard() {
     }
   }, [user])
 
-  const fetchSetterStats = async () => {
+  const fetchSetterStats = async (fromDate?: string, toDate?: string) => {
     if (!user?.setterId) return
+
+    const from = fromDate ?? dateFrom
+    const to = toDate ?? dateTo
 
     setLoading(true)
     try {
       let url = '/api/setters'
 
       // If date filter is active, use stats endpoint
-      if (dateFrom || dateTo) {
+      if (from || to) {
         const params = new URLSearchParams()
-        if (dateFrom) params.append('dateFrom', dateFrom)
-        if (dateTo) params.append('dateTo', dateTo)
+        if (from) params.append('dateFrom', from)
+        if (to) params.append('dateTo', to)
         url = `/api/setters/stats?${params.toString()}`
       }
 
@@ -99,16 +102,19 @@ export default function SetterDashboard() {
     }
   }
 
-  const fetchDailyStats = async () => {
+  const fetchDailyStats = async (fromDate?: string, toDate?: string) => {
     if (!user?.setterId) return
+
+    const from = fromDate ?? dateFrom
+    const to = toDate ?? dateTo
 
     try {
       let url = `/api/setters/daily-stats?setterId=${user.setterId}`
 
       // Add date filters if active
-      if (dateFrom || dateTo) {
-        if (dateFrom) url += `&dateFrom=${dateFrom}`
-        if (dateTo) url += `&dateTo=${dateTo}`
+      if (from || to) {
+        if (from) url += `&dateFrom=${from}`
+        if (to) url += `&dateTo=${to}`
       }
 
       const response = await fetch(url)
@@ -117,24 +123,14 @@ export default function SetterDashboard() {
       const data = await response.json()
       setDailyStats(data.dailyStats || [])
       setBestDay(data.bestDay || null)
-    } catch (error: any) {
-      console.error('Failed to load daily stats:', error)
+    } catch {
+      // Silent fail - daily stats are optional
     }
   }
 
-  const applyDateFilter = () => {
-    fetchSetterStats()
-    fetchDailyStats()
-  }
-
-  const clearDateFilter = () => {
-    setDateFrom('')
-    setDateTo('')
-    // Refetch will happen after state changes
-    setTimeout(() => {
-      fetchSetterStats()
-      fetchDailyStats()
-    }, 0)
+  const applyDateFilter = (from: string, to: string) => {
+    fetchSetterStats(from, to)
+    fetchDailyStats(from, to)
   }
 
   const handleSignOut = async () => {
@@ -177,8 +173,16 @@ export default function SetterDashboard() {
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: 'var(--space-4) var(--space-6)' }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="badge-live" style={{ backgroundColor: 'var(--color-accent-secondary)' }}>
-                <span>SETTER</span>
+              <div style={{
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                padding: '6px 16px',
+                borderRadius: '9999px',
+                fontSize: 'var(--text-sm)',
+                fontWeight: 700,
+                letterSpacing: '1px'
+              }}>
+                SETTER
               </div>
               <div>
                 <h1 className="text-h1" style={{ marginBottom: 'var(--space-1)' }}>My Performance</h1>
@@ -203,39 +207,16 @@ export default function SetterDashboard() {
 
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: 'var(--space-6)' }}>
         {/* Date Range Filter */}
-        <div style={{
-          display: 'flex',
-          gap: 'var(--space-4)',
-          marginBottom: 'var(--space-6)',
-          padding: 'var(--space-4)',
-          backgroundColor: 'var(--color-bg-secondary)',
-          borderRadius: 'var(--radius-md)',
-          border: '1px solid var(--color-border)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-            <span className="text-small" style={{ color: 'var(--color-text-muted)', minWidth: '40px' }}>From:</span>
-            <Input
-              type="date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              style={{ width: '160px' }}
-            />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-            <span className="text-small" style={{ color: 'var(--color-text-muted)', minWidth: '30px' }}>To:</span>
-            <Input
-              type="date"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              style={{ width: '160px' }}
-            />
-          </div>
-          <Button onClick={applyDateFilter} className="btn btn-primary">
-            Apply
-          </Button>
-          <Button onClick={clearDateFilter} className="btn btn-secondary">
-            Clear
-          </Button>
+        <div style={{ marginBottom: 'var(--space-6)' }}>
+          <DateRangeFilter
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+            onDateChange={(from, to) => {
+              setDateFrom(from)
+              setDateTo(to)
+            }}
+            onApply={(from, to) => applyDateFilter(from, to)}
+          />
         </div>
 
         {/* KPI Cards Grid */}

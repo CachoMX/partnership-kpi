@@ -14,24 +14,31 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 
 export async function POST(request: NextRequest) {
   try {
-    const { email } = await request.json()
+    const { email: rawEmail } = await request.json()
 
-    if (!email) {
+    if (!rawEmail) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
 
-    // Fetch user role
+    // Normalize email to lowercase for consistent lookup
+    const email = rawEmail.toLowerCase().trim()
+
+    // Fetch user role (using ilike for case-insensitive match as fallback)
     const { data: userData, error: userError } = await supabaseAdmin
       .from('users')
       .select('role, email, name')
-      .eq('email', email)
+      .ilike('email', email)
       .single()
 
     if (userError || !userData) {
+      // User exists in auth but not in users table
+      // Return 200 with null role so frontend can handle it
       return NextResponse.json({
-        error: 'User not found',
-        role: null
-      }, { status: 404 })
+        role: null,
+        name: null,
+        closerId: null,
+        setterId: null
+      }, { status: 200 })
     }
 
     // If closer or setter, get their IDs
@@ -41,15 +48,15 @@ export async function POST(request: NextRequest) {
       const { data: closerData } = await supabaseAdmin
         .from('closers')
         .select('id')
-        .eq('email', email)
-        .single()
+        .ilike('email', email)
+        .maybeSingle()
       closerId = closerData?.id
     } else if (userData.role === 'setter') {
       const { data: setterData } = await supabaseAdmin
         .from('setters')
         .select('id')
-        .eq('email', email)
-        .single()
+        .ilike('email', email)
+        .maybeSingle()
       setterId = setterData?.id
     }
 

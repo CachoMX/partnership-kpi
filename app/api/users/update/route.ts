@@ -13,17 +13,38 @@ export async function POST(request: NextRequest) {
   })
 
   try {
-    const { userId, name, email, role, password } = await request.json()
+    const { userId, name, email: rawEmail, role, password } = await request.json()
 
-    if (!userId || !name || !email || !role) {
+    if (!userId || !name || !rawEmail || !role) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
+
+    // Normalize email to lowercase to prevent case sensitivity issues
+    const email = rawEmail.toLowerCase().trim()
+
+    // Get current user data BEFORE updating (to get the old email for closers/setters lookup)
+    const { data: currentUserData, error: fetchError } = await supabaseAdmin
+      .from('users')
+      .select('email, role')
+      .eq('id', userId)
+      .single()
+
+    if (fetchError) {
+      console.error('Error fetching current user:', fetchError)
+      return NextResponse.json({ error: fetchError.message }, { status: 500 })
+    }
+
+    const oldEmail = currentUserData?.email
+    const oldRole = currentUserData?.role
 
     // Prepare auth update payload
     const authUpdatePayload: any = { email }
 
     // Only update password if provided
     if (password && password.trim() !== "") {
+      if (password.length < 6) {
+        return NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 })
+      }
       authUpdatePayload.password = password
     }
 
@@ -49,20 +70,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: usersError.message }, { status: 500 })
     }
 
-    // Get closer_id or setter_id from users table
-    const { data: userData } = await supabaseAdmin
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single()
-
-    // Update closers/setters table if applicable
-    if (role === 'closer' && userData) {
+    // Update closers/setters table if applicable (use OLD email to find the record, case-insensitive)
+    if (oldRole === 'closer') {
       const { data: closerData } = await supabaseAdmin
         .from('closers')
         .select('id')
-        .eq('email', email)
-        .single()
+        .ilike('email', oldEmail)
+        .maybeSingle()
 
       if (closerData) {
         await supabaseAdmin
@@ -70,12 +84,12 @@ export async function POST(request: NextRequest) {
           .update({ name, email })
           .eq('id', closerData.id)
       }
-    } else if (role === 'setter' && userData) {
+    } else if (oldRole === 'setter') {
       const { data: setterData } = await supabaseAdmin
         .from('setters')
         .select('id')
-        .eq('email', email)
-        .single()
+        .ilike('email', oldEmail)
+        .maybeSingle()
 
       if (setterData) {
         await supabaseAdmin

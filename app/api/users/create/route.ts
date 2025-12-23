@@ -15,11 +15,14 @@ export async function POST(request: NextRequest) {
   })
 
   try {
-    const { email, password, name, role } = await request.json()
+    const { email: rawEmail, password, name, role } = await request.json()
 
-    if (!email || !password || !name || !role) {
+    if (!rawEmail || !password || !name || !role) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
+
+    // Normalize email to lowercase to prevent case sensitivity issues
+    const email = rawEmail.toLowerCase().trim()
 
     // Create auth user with admin client
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
