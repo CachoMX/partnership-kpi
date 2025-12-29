@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { LogOut, TrendingUp, Users, DollarSign, Target, Award, Calendar, ArrowLeft } from "lucide-react"
@@ -49,7 +49,7 @@ interface BestDay {
   closed_deals: number
 }
 
-export default function ViewCloserDashboard() {
+function ViewCloserDashboardContent() {
   const { user, loading: authLoading, signOut } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -464,5 +464,20 @@ export default function ViewCloserDashboard() {
         )}
       </div>
     </main>
+  )
+}
+
+export default function ViewCloserDashboard() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: 'var(--color-accent)' }}></div>
+          <div style={{ color: 'var(--color-text-primary)' }}>Loading...</div>
+        </div>
+      </div>
+    }>
+      <ViewCloserDashboardContent />
+    </Suspense>
   )
 }
