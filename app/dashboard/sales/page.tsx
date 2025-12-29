@@ -31,6 +31,10 @@ interface Call {
   medium: string | null
   campaign: string | null
   offer_made: boolean
+  sales_platform: string | null
+  payment_method: string | null
+  commission_override: number | null
+  commission_rate_override: number | null
 }
 
 interface Closer {
@@ -174,6 +178,42 @@ export default function SalesPage() {
     }
   }
 
+  const handleUpdateCommission = async (
+    callId: string,
+    field: 'commission_override' | 'commission_rate_override' | 'sales_platform' | 'payment_method',
+    value: string | number | null
+  ) => {
+    setUpdatingId(callId)
+    try {
+      const payload: any = { callId, [field]: value }
+
+      const res = await fetch('/api/sales/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to update')
+      }
+
+      // Update local state
+      setCalls(prev => prev.map(call => {
+        if (call.id === callId) {
+          return { ...call, [field]: value }
+        }
+        return call
+      }))
+
+      toast.success('Updated successfully')
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update')
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+
   const formatDate = (timestamp: string | null) => {
     if (!timestamp) return '-'
     const date = new Date(timestamp)
@@ -192,10 +232,29 @@ export default function SalesPage() {
 
   // Calculate commission for a call (rate is stored as percentage, e.g. 10 = 10%)
   const getCommission = (call: Call) => {
+    // If there's a manual commission override, use that
+    if (call.commission_override !== null && call.commission_override !== undefined) {
+      return call.commission_override
+    }
+
     if (!call.closer_id) return 0
-    const rate = closerCommissionRates[call.closer_id] || 0
+
+    // Use override rate if present, otherwise use closer's default rate
+    const rate = call.commission_rate_override !== null && call.commission_rate_override !== undefined
+      ? call.commission_rate_override
+      : (closerCommissionRates[call.closer_id] || 0)
+
     const cash = (call.cash_collected || 0) + (call.cash_collected_2 || 0)
     return cash * (rate / 100)
+  }
+
+  // Get the effective commission rate (showing what rate is actually used)
+  const getEffectiveRate = (call: Call) => {
+    if (call.commission_rate_override !== null && call.commission_rate_override !== undefined) {
+      return call.commission_rate_override
+    }
+    if (!call.closer_id) return 0
+    return closerCommissionRates[call.closer_id] || 0
   }
 
   // Calculate totals
@@ -452,8 +511,9 @@ export default function SalesPage() {
                   </tr>
                 ) : (
                   calls.map((call) => {
-                    const commRate = call.closer_id ? (closerCommissionRates[call.closer_id] || 0) : 0
+                    const effectiveRate = getEffectiveRate(call)
                     const isExpanded = expandedRow === call.id
+                    const hasOverride = call.commission_override !== null || call.commission_rate_override !== null
                     return (
                       <>
                         <tr key={call.id} style={{ opacity: updatingId === call.id ? 0.5 : 1 }}>
@@ -506,8 +566,9 @@ export default function SalesPage() {
                           <td style={{ textAlign: 'right', fontWeight: 'var(--font-bold)', color: 'var(--color-accent)' }}>
                             {formatCurrency((call.cash_collected || 0) + (call.cash_collected_2 || 0))}
                           </td>
-                          <td style={{ textAlign: 'right', fontWeight: 'var(--font-medium)', color: 'var(--color-text-muted)' }}>
-                            {commRate > 0 ? `${commRate}%` : '-'}
+                          <td style={{ textAlign: 'right', fontWeight: 'var(--font-medium)', color: hasOverride ? 'var(--color-warning)' : 'var(--color-text-muted)' }}>
+                            {effectiveRate > 0 ? `${effectiveRate}%` : '-'}
+                            {hasOverride && <span style={{ fontSize: 'var(--text-xs)' }}>*</span>}
                           </td>
                           <td style={{ textAlign: 'right', fontWeight: 'var(--font-medium)', color: 'var(--color-warning)' }}>
                             {formatCurrency(getCommission(call))}
@@ -582,7 +643,7 @@ export default function SalesPage() {
                                 borderTop: '1px solid var(--color-border)',
                                 borderBottom: '1px solid var(--color-border)'
                               }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-4)' }}>
                                   {/* Contact Info */}
                                   <div>
                                     <h4 style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-semibold)', marginBottom: 'var(--space-2)', color: 'var(--color-text-primary)' }}>
@@ -608,6 +669,61 @@ export default function SalesPage() {
                                     </div>
                                   </div>
 
+                                  {/* Sales Platform & Payment */}
+                                  <div>
+                                    <h4 style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-semibold)', marginBottom: 'var(--space-2)', color: 'var(--color-text-primary)' }}>
+                                      🏪 Sales Details
+                                    </h4>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                                      <div>
+                                        <label style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', display: 'block', marginBottom: '2px' }}>Platform:</label>
+                                        <select
+                                          value={call.sales_platform || ''}
+                                          onChange={(e) => handleUpdateCommission(call.id, 'sales_platform', e.target.value || null)}
+                                          disabled={updatingId === call.id}
+                                          style={{
+                                            backgroundColor: 'var(--color-bg-card)',
+                                            color: 'var(--color-text-primary)',
+                                            border: '1px solid var(--color-border)',
+                                            borderRadius: '4px',
+                                            padding: '4px 6px',
+                                            fontSize: 'var(--text-xs)',
+                                            cursor: 'pointer',
+                                            width: '100%'
+                                          }}
+                                        >
+                                          <option value="">Select...</option>
+                                          <option value="Elective">Elective</option>
+                                          <option value="Whop">Whop</option>
+                                          <option value="Fanbasis">Fanbasis</option>
+                                        </select>
+                                      </div>
+                                      <div>
+                                        <label style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', display: 'block', marginBottom: '2px' }}>Payment:</label>
+                                        <select
+                                          value={call.payment_method || ''}
+                                          onChange={(e) => handleUpdateCommission(call.id, 'payment_method', e.target.value || null)}
+                                          disabled={updatingId === call.id}
+                                          style={{
+                                            backgroundColor: 'var(--color-bg-card)',
+                                            color: 'var(--color-text-primary)',
+                                            border: '1px solid var(--color-border)',
+                                            borderRadius: '4px',
+                                            padding: '4px 6px',
+                                            fontSize: 'var(--text-xs)',
+                                            cursor: 'pointer',
+                                            width: '100%'
+                                          }}
+                                        >
+                                          <option value="">Select...</option>
+                                          <option value="Debit">Debit</option>
+                                          <option value="Bank">Bank</option>
+                                          <option value="Financing">Financing</option>
+                                        </select>
+                                      </div>
+                                    </div>
+                                  </div>
+
                                   {/* Call Details */}
                                   <div>
                                     <h4 style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-semibold)', marginBottom: 'var(--space-2)', color: 'var(--color-text-primary)' }}>
@@ -618,6 +734,55 @@ export default function SalesPage() {
                                       <div><strong>Cash Collected (1):</strong> {formatCurrency(call.cash_collected)}</div>
                                       <div><strong>Cash Collected (2):</strong> {formatCurrency(call.cash_collected_2)}</div>
                                       <div><strong>Offer Made:</strong> {call.offer_made ? 'Yes' : 'No'}</div>
+                                    </div>
+                                  </div>
+
+                                  {/* Commission Overrides */}
+                                  <div>
+                                    <h4 style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-semibold)', marginBottom: 'var(--space-2)', color: 'var(--color-text-primary)' }}>
+                                      ⚙️ Commission Overrides
+                                    </h4>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                                      <div>
+                                        <label style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', display: 'block', marginBottom: '2px' }}>Rate Override (%):</label>
+                                        <input
+                                          type="number"
+                                          step="0.1"
+                                          value={call.commission_rate_override ?? ''}
+                                          onChange={(e) => handleUpdateCommission(call.id, 'commission_rate_override', e.target.value ? parseFloat(e.target.value) : null)}
+                                          disabled={updatingId === call.id}
+                                          placeholder="Default rate"
+                                          style={{
+                                            backgroundColor: 'var(--color-bg-card)',
+                                            color: 'var(--color-text-primary)',
+                                            border: '1px solid var(--color-border)',
+                                            borderRadius: '4px',
+                                            padding: '4px 6px',
+                                            fontSize: 'var(--text-xs)',
+                                            width: '100%'
+                                          }}
+                                        />
+                                      </div>
+                                      <div>
+                                        <label style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', display: 'block', marginBottom: '2px' }}>Amount Override ($):</label>
+                                        <input
+                                          type="number"
+                                          step="0.01"
+                                          value={call.commission_override ?? ''}
+                                          onChange={(e) => handleUpdateCommission(call.id, 'commission_override', e.target.value ? parseFloat(e.target.value) : null)}
+                                          disabled={updatingId === call.id}
+                                          placeholder="Calculated amount"
+                                          style={{
+                                            backgroundColor: 'var(--color-bg-card)',
+                                            color: 'var(--color-text-primary)',
+                                            border: '1px solid var(--color-border)',
+                                            borderRadius: '4px',
+                                            padding: '4px 6px',
+                                            fontSize: 'var(--text-xs)',
+                                            width: '100%'
+                                          }}
+                                        />
+                                      </div>
                                     </div>
                                   </div>
 

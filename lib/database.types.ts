@@ -158,6 +158,10 @@ export interface Database {
           setter_id: string | null
           setter_name: string | null
           notes: string | null
+          sales_platform: string | null
+          payment_method: string | null
+          commission_override: number | null
+          commission_rate_override: number | null
           created_at: string
           updated_at: string
         }
@@ -182,6 +186,10 @@ export interface Database {
           setter_id?: string | null
           setter_name?: string | null
           notes?: string | null
+          sales_platform?: string | null
+          payment_method?: string | null
+          commission_override?: number | null
+          commission_rate_override?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -206,6 +214,10 @@ export interface Database {
           setter_id?: string | null
           setter_name?: string | null
           notes?: string | null
+          sales_platform?: string | null
+          payment_method?: string | null
+          commission_override?: number | null
+          commission_rate_override?: number | null
           created_at?: string
           updated_at?: string
         }

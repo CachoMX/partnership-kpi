@@ -222,6 +222,12 @@ export default function Dashboard() {
                   Sales
                 </Button>
               </Link>
+              <Link href="/dashboard/payouts">
+                <Button className="btn btn-secondary">
+                  <DollarSign className="w-5 h-5" />
+                  Payouts
+                </Button>
+              </Link>
               <Link href="/dashboard/users">
                 <Button className="btn btn-secondary">
                   <UserCog className="w-5 h-5" />

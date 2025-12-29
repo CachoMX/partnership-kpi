@@ -21,7 +21,8 @@
       "Bash(rm:*)",
       "Bash(cat:*)",
       "Bash(vercel:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(git pull:*)"
     ],
     "deny": [],
     "ask": []

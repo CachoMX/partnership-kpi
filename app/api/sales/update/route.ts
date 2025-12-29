@@ -13,7 +13,17 @@ export async function POST(request: NextRequest) {
   })
 
   try {
-    const { callId, closerId, closerName, setterId, setterName } = await request.json()
+    const {
+      callId,
+      closerId,
+      closerName,
+      setterId,
+      setterName,
+      sales_platform,
+      payment_method,
+      commission_override,
+      commission_rate_override
+    } = await request.json()
 
     if (!callId) {
       return NextResponse.json({ error: 'Missing callId' }, { status: 400 })
@@ -31,6 +41,26 @@ export async function POST(request: NextRequest) {
     if (setterId !== undefined) {
       updateData.setter_id = setterId || null
       updateData.setter_name = setterName || null
+    }
+
+    // Update sales platform if provided
+    if (sales_platform !== undefined) {
+      updateData.sales_platform = sales_platform || null
+    }
+
+    // Update payment method if provided
+    if (payment_method !== undefined) {
+      updateData.payment_method = payment_method || null
+    }
+
+    // Update commission override if provided
+    if (commission_override !== undefined) {
+      updateData.commission_override = commission_override || null
+    }
+
+    // Update commission rate override if provided
+    if (commission_rate_override !== undefined) {
+      updateData.commission_rate_override = commission_rate_override || null
     }
 
     if (Object.keys(updateData).length === 0) {

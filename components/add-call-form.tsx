@@ -39,6 +39,10 @@ export function AddCallForm({ closers, setters, onSuccess }: AddCallFormProps) {
     medium: '',
     campaign: '',
     call_recording_link: '',
+    sales_platform: '',
+    payment_method: '',
+    commission_override: null as number | null,
+    commission_rate_override: null as number | null,
     notes: ''
   })
 
@@ -82,6 +86,10 @@ export function AddCallForm({ closers, setters, onSuccess }: AddCallFormProps) {
         medium: '',
         campaign: '',
         call_recording_link: '',
+        sales_platform: '',
+        payment_method: '',
+        commission_override: null as number | null,
+        commission_rate_override: null as number | null,
         notes: ''
       })
 
@@ -297,6 +305,70 @@ export function AddCallForm({ closers, setters, onSuccess }: AddCallFormProps) {
               onChange={(e) => setFormData({ ...formData, call_recording_link: e.target.value })}
               placeholder="https://"
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="sales_platform">Sales Platform</Label>
+              <Select
+                value={formData.sales_platform}
+                onValueChange={(value) => setFormData({ ...formData, sales_platform: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select platform" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="Elective">Elective</SelectItem>
+                  <SelectItem value="Whop">Whop</SelectItem>
+                  <SelectItem value="Fanbasis">Fanbasis</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="payment_method">Payment Method</Label>
+              <Select
+                value={formData.payment_method}
+                onValueChange={(value) => setFormData({ ...formData, payment_method: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select payment method" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="Debit">Debit</SelectItem>
+                  <SelectItem value="Bank">Bank</SelectItem>
+                  <SelectItem value="Financing">Financing</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="commission_override">Commission Override ($)</Label>
+              <Input
+                id="commission_override"
+                type="number"
+                step="0.01"
+                value={formData.commission_override ?? ''}
+                onChange={(e) => setFormData({ ...formData, commission_override: e.target.value ? parseFloat(e.target.value) : null })}
+                placeholder="Leave blank for default"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="commission_rate_override">Commission Rate Override (%)</Label>
+              <Input
+                id="commission_rate_override"
+                type="number"
+                step="0.1"
+                value={formData.commission_rate_override ?? ''}
+                onChange={(e) => setFormData({ ...formData, commission_rate_override: e.target.value ? parseFloat(e.target.value) : null })}
+                placeholder="Leave blank for default"
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
