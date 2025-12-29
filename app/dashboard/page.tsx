@@ -448,7 +448,14 @@ export default function Dashboard() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-6)' }}>
           {/* Closers Leaderboard */}
           <div className="card">
-            <h2 className="text-h2 mb-4">🏆 Closers Leaderboard</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-h2">🏆 Closers Leaderboard</h2>
+              <Link href="/dashboard/view-closer">
+                <Button size="sm" className="btn btn-secondary">
+                  View Individual
+                </Button>
+              </Link>
+            </div>
             <div className="table-wrapper">
               <table className="table">
                 <thead>
@@ -489,7 +496,14 @@ export default function Dashboard() {
 
           {/* Setters Leaderboard */}
           <div className="card">
-            <h2 className="text-h2 mb-4">⚡ Setters Leaderboard</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-h2">⚡ Setters Leaderboard</h2>
+              <Link href="/dashboard/view-setter">
+                <Button size="sm" className="btn btn-secondary">
+                  View Individual
+                </Button>
+              </Link>
+            </div>
             <div className="table-wrapper">
               <table className="table">
                 <thead>

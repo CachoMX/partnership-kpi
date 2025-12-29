@@ -50,10 +50,9 @@ export default function SetterDashboard() {
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login')
-    } else if (!authLoading && user && user.role !== 'setter') {
-      if (user.role === 'admin') {
-        router.push('/dashboard')
-      } else if (user.role === 'closer') {
+    } else if (!authLoading && user && user.role !== 'setter' && user.role !== 'admin') {
+      // Only redirect non-setters who are also not admins
+      if (user.role === 'closer') {
         router.push('/dashboard/closer')
       }
     }

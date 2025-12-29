@@ -1,15 +1,22 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { LogOut, TrendingUp, Users, DollarSign, Target, Award, Calendar } from "lucide-react"
+import { LogOut, TrendingUp, Users, DollarSign, Target, Award, Calendar, ArrowLeft } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useAuth } from "@/lib/auth-context"
 import { DateRangeFilter } from "@/components/date-range-filter"
 import { toast } from "sonner"
 import Link from "next/link"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface CloserStats {
   id: string
@@ -42,9 +49,12 @@ interface BestDay {
   closed_deals: number
 }
 
-export default function CloserDashboard() {
+export default function ViewCloserDashboard() {
   const { user, loading: authLoading, signOut } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const [closers, setClosers] = useState<CloserStats[]>([])
+  const [selectedCloserId, setSelectedCloserId] = useState<string>('')
   const [stats, setStats] = useState<CloserStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [dailyStats, setDailyStats] = useState<DailyStats[]>([])
@@ -55,23 +65,45 @@ export default function CloserDashboard() {
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login')
-    } else if (!authLoading && user && user.role !== 'closer' && user.role !== 'admin') {
-      // Only redirect non-closers who are also not admins
-      if (user.role === 'setter') {
-        router.push('/dashboard/setter')
-      }
+    } else if (!authLoading && user && user.role !== 'admin') {
+      router.push('/dashboard')
+    } else if (!authLoading && user && user.role === 'admin') {
+      fetchClosers()
     }
   }, [user, authLoading, router])
 
   useEffect(() => {
-    if (user?.closerId) {
+    const closerIdFromUrl = searchParams.get('closerId')
+    if (closerIdFromUrl) {
+      setSelectedCloserId(closerIdFromUrl)
+    }
+  }, [searchParams])
+
+  useEffect(() => {
+    if (selectedCloserId) {
       fetchCloserStats()
       fetchDailyStats()
     }
-  }, [user])
+  }, [selectedCloserId])
+
+  const fetchClosers = async () => {
+    try {
+      const response = await fetch('/api/closers')
+      if (!response.ok) throw new Error('Failed to fetch closers')
+      const data = await response.json()
+      setClosers(data.data || [])
+
+      // Auto-select first closer if none selected
+      if (!selectedCloserId && data.data && data.data.length > 0) {
+        setSelectedCloserId(data.data[0].id)
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to load closers')
+    }
+  }
 
   const fetchCloserStats = async (fromDate?: string, toDate?: string) => {
-    if (!user?.closerId) return
+    if (!selectedCloserId) return
 
     const from = fromDate ?? dateFrom
     const to = toDate ?? dateTo
@@ -92,12 +124,12 @@ export default function CloserDashboard() {
       if (!response.ok) throw new Error('Failed to fetch stats')
 
       const data = await response.json()
-      const myStats = data.data.find((c: CloserStats) => c.id === user.closerId)
+      const closerStats = data.data.find((c: CloserStats) => c.id === selectedCloserId)
 
-      if (myStats) {
-        setStats(myStats)
+      if (closerStats) {
+        setStats(closerStats)
       } else {
-        toast.error('Could not find your stats')
+        toast.error('Could not find closer stats')
       }
     } catch (error: any) {
       toast.error(error.message || 'Failed to load stats')
@@ -107,13 +139,13 @@ export default function CloserDashboard() {
   }
 
   const fetchDailyStats = async (fromDate?: string, toDate?: string) => {
-    if (!user?.closerId) return
+    if (!selectedCloserId) return
 
     const from = fromDate ?? dateFrom
     const to = toDate ?? dateTo
 
     try {
-      let url = `/api/closers/daily-stats?closerId=${user.closerId}`
+      let url = `/api/closers/daily-stats?closerId=${selectedCloserId}`
 
       // Add date filters if active
       if (from || to) {
@@ -146,18 +178,24 @@ export default function CloserDashboard() {
     }
   }
 
+  const handleCloserChange = (closerId: string) => {
+    setSelectedCloserId(closerId)
+    // Update URL
+    router.push(`/dashboard/view-closer?closerId=${closerId}`)
+  }
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: 'var(--color-accent)' }}></div>
-          <div style={{ color: 'var(--color-text-primary)' }}>Loading your stats...</div>
+          <div style={{ color: 'var(--color-text-primary)' }}>Loading stats...</div>
         </div>
       </div>
     )
   }
 
-  if (!user || user.role !== 'closer' || !stats) {
+  if (!user || user.role !== 'admin' || !stats) {
     return null
   }
 
@@ -178,6 +216,12 @@ export default function CloserDashboard() {
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: 'var(--space-4) var(--space-6)' }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
+              <Link href="/dashboard">
+                <Button className="btn btn-secondary" size="sm">
+                  <ArrowLeft className="w-4 h-4" />
+                  Back
+                </Button>
+              </Link>
               <div style={{
                 backgroundColor: '#10b981',
                 color: 'white',
@@ -190,21 +234,24 @@ export default function CloserDashboard() {
                 CLOSER
               </div>
               <div>
-                <h1 className="text-h1" style={{ marginBottom: 'var(--space-1)' }}>My Performance</h1>
-                <p className="text-small" style={{ color: 'var(--color-text-muted)' }}>Welcome back, {stats.name}!</p>
+                <h1 className="text-h1" style={{ marginBottom: 'var(--space-1)' }}>
+                  <Select value={selectedCloserId} onValueChange={handleCloserChange}>
+                    <SelectTrigger style={{ width: '250px', fontSize: 'var(--text-2xl)', fontWeight: 'var(--font-bold)', border: 'none', padding: 0 }}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {closers.map((closer) => (
+                        <SelectItem key={closer.id} value={closer.id}>
+                          {closer.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </h1>
+                <p className="text-small" style={{ color: 'var(--color-text-muted)' }}>Performance Overview</p>
               </div>
             </div>
             <div className="flex gap-2">
-              <Link href="/submit-call">
-                <Button className="btn btn-primary">
-                  + Add Call
-                </Button>
-              </Link>
-              <Link href="/submit-eod">
-                <Button className="btn btn-secondary">
-                  📋 EOD Form
-                </Button>
-              </Link>
               <ThemeToggle />
               <Button onClick={handleSignOut} className="btn btn-secondary">
                 <LogOut className="w-5 h-5" />
@@ -350,7 +397,7 @@ export default function CloserDashboard() {
                 </div>
               </div>
               <div>
-                <div className="text-small text-muted">Your Best Day</div>
+                <div className="text-small text-muted">Best Day</div>
                 <h2 className="text-h2" style={{ marginBottom: 'var(--space-1)' }}>
                   {new Date(bestDay.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                 </h2>
@@ -369,16 +416,6 @@ export default function CloserDashboard() {
             <h2 className="text-h2 mb-6">Performance History</h2>
             <ResponsiveContainer width="100%" height={350}>
               <LineChart data={dailyStats}>
-                <defs>
-                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-accent)" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="var(--color-accent)" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="colorCash" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-info)" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="var(--color-info)" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                 <XAxis
                   dataKey="date"
@@ -425,19 +462,6 @@ export default function CloserDashboard() {
             </ResponsiveContainer>
           </div>
         )}
-
-        {/* Info Card */}
-        <div className="card" style={{ textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
-          <h2 className="text-h2 mb-4">📞 Ready to log a new call?</h2>
-          <p style={{ color: 'var(--color-text-muted)', marginBottom: 'var(--space-4)' }}>
-            Click the "Add Call" button to record your latest call and watch your stats update in real-time!
-          </p>
-          <Link href="/submit-call">
-            <Button className="btn btn-primary" size="lg">
-              + Add New Call
-            </Button>
-          </Link>
-        </div>
       </div>
     </main>
   )
