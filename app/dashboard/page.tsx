@@ -228,6 +228,16 @@ export default function Dashboard() {
                   Manage Users
                 </Button>
               </Link>
+              <Link href="/dashboard/eod-reports">
+                <Button className="btn btn-secondary">
+                  📊 EOD Reports
+                </Button>
+              </Link>
+              <Link href="/submit-eod">
+                <Button className="btn btn-secondary">
+                  📋 EOD Form
+                </Button>
+              </Link>
               <Button
                 onClick={fetchData}
                 variant="outline"
