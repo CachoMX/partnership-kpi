@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, RefreshCw, DollarSign, Filter } from "lucide-react"
+import { ArrowLeft, RefreshCw, DollarSign, Filter, ChevronDown, ChevronRight, ExternalLink } from "lucide-react"
 import { DateRangeFilter } from "@/components/date-range-filter"
 import Link from "next/link"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -26,6 +26,11 @@ interface Call {
   setter_id: string | null
   setter_name: string | null
   notes: string | null
+  call_recording_link: string | null
+  lead_source: string | null
+  medium: string | null
+  campaign: string | null
+  offer_made: boolean
 }
 
 interface Closer {
@@ -54,6 +59,7 @@ export default function SalesPage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [totalCount, setTotalCount] = useState<number | null>(null)
   const [isLimited, setIsLimited] = useState(false)
+  const [expandedRow, setExpandedRow] = useState<string | null>(null)
 
   const resultOptions = ['Closed', 'Follow-Up Scheduled', 'No Show', 'DQ', 'Reschedule', 'Other']
 
@@ -425,11 +431,13 @@ export default function SalesPage() {
             <table className="table">
               <thead style={{ position: 'sticky', top: 0, backgroundColor: 'var(--color-bg-card)', zIndex: 1 }}>
                 <tr>
+                  <th style={{ width: '40px' }}></th>
                   <th>Date</th>
                   <th>Lead</th>
                   <th>Result</th>
                   <th style={{ textAlign: 'right' }}>Revenue</th>
                   <th style={{ textAlign: 'right' }}>Cash</th>
+                  <th style={{ textAlign: 'right' }}>Comm %</th>
                   <th style={{ textAlign: 'right' }}>Commission</th>
                   <th>Closer</th>
                   <th>Setter</th>
@@ -438,111 +446,227 @@ export default function SalesPage() {
               <tbody>
                 {calls.length === 0 ? (
                   <tr>
-                    <td colSpan={8} style={{ textAlign: 'center', padding: 'var(--space-8)', color: 'var(--color-text-muted)' }}>
+                    <td colSpan={10} style={{ textAlign: 'center', padding: 'var(--space-8)', color: 'var(--color-text-muted)' }}>
                       No sales found for the selected filters
                     </td>
                   </tr>
                 ) : (
-                  calls.map((call) => (
-                    <tr key={call.id} style={{ opacity: updatingId === call.id ? 0.5 : 1 }}>
-                      <td style={{ whiteSpace: 'nowrap' }}>{formatDate(call.booking_date)}</td>
-                      <td>
-                        <div style={{ fontWeight: 'var(--font-medium)' }}>{call.lead_name || '-'}</div>
-                        {call.lead_email && (
-                          <div className="text-small text-muted">{call.lead_email}</div>
+                  calls.map((call) => {
+                    const commRate = call.closer_id ? (closerCommissionRates[call.closer_id] || 0) : 0
+                    const isExpanded = expandedRow === call.id
+                    return (
+                      <>
+                        <tr key={call.id} style={{ opacity: updatingId === call.id ? 0.5 : 1 }}>
+                          <td>
+                            <button
+                              onClick={() => setExpandedRow(isExpanded ? null : call.id)}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: '4px',
+                                color: 'var(--color-text-primary)',
+                                display: 'flex',
+                                alignItems: 'center'
+                              }}
+                            >
+                              {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                            </button>
+                          </td>
+                          <td style={{ whiteSpace: 'nowrap' }}>{formatDate(call.booking_date)}</td>
+                          <td>
+                            <div style={{ fontWeight: 'var(--font-medium)' }}>{call.lead_name || '-'}</div>
+                            {call.lead_email && (
+                              <div className="text-small text-muted">{call.lead_email}</div>
+                            )}
+                          </td>
+                          <td>
+                            <span style={{
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              fontSize: 'var(--text-xs)',
+                              fontWeight: 'var(--font-medium)',
+                              backgroundColor: call.result === 'Closed'
+                                ? 'rgba(16, 185, 129, 0.15)'
+                                : call.result === 'No Show'
+                                  ? 'rgba(239, 68, 68, 0.15)'
+                                  : 'rgba(59, 130, 246, 0.15)',
+                              color: call.result === 'Closed'
+                                ? '#10b981'
+                                : call.result === 'No Show'
+                                  ? '#ef4444'
+                                  : '#3b82f6'
+                            }}>
+                              {call.result || '-'}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'right', fontWeight: 'var(--font-medium)' }}>
+                            {formatCurrency(call.revenue || 0)}
+                          </td>
+                          <td style={{ textAlign: 'right', fontWeight: 'var(--font-bold)', color: 'var(--color-accent)' }}>
+                            {formatCurrency((call.cash_collected || 0) + (call.cash_collected_2 || 0))}
+                          </td>
+                          <td style={{ textAlign: 'right', fontWeight: 'var(--font-medium)', color: 'var(--color-text-muted)' }}>
+                            {commRate > 0 ? `${commRate}%` : '-'}
+                          </td>
+                          <td style={{ textAlign: 'right', fontWeight: 'var(--font-medium)', color: 'var(--color-warning)' }}>
+                            {formatCurrency(getCommission(call))}
+                          </td>
+                          <td>
+                            <select
+                              value={call.closer_id || ''}
+                              onChange={(e) => {
+                                const selectedCloser = closers.find(c => c.id === e.target.value)
+                                handleUpdateAssignment(
+                                  call.id,
+                                  'closer',
+                                  e.target.value || null,
+                                  selectedCloser?.name || null
+                                )
+                              }}
+                              disabled={updatingId === call.id}
+                              style={{
+                                backgroundColor: 'var(--color-bg-secondary)',
+                                color: 'var(--color-text-primary)',
+                                border: '1px solid var(--color-border)',
+                                borderRadius: '4px',
+                                padding: '4px 8px',
+                                fontSize: 'var(--text-sm)',
+                                cursor: 'pointer',
+                                minWidth: '120px'
+                              }}
+                            >
+                              <option value="" style={{ backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-primary)' }}>-- None --</option>
+                              {closers.map(c => (
+                                <option key={c.id} value={c.id} style={{ backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-primary)' }}>{c.name}</option>
+                              ))}
+                            </select>
+                          </td>
+                          <td>
+                            <select
+                              value={call.setter_id || ''}
+                              onChange={(e) => {
+                                const selectedSetter = setters.find(s => s.id === e.target.value)
+                                handleUpdateAssignment(
+                                  call.id,
+                                  'setter',
+                                  e.target.value || null,
+                                  selectedSetter?.name || null
+                                )
+                              }}
+                              disabled={updatingId === call.id}
+                              style={{
+                                backgroundColor: 'var(--color-bg-secondary)',
+                                color: 'var(--color-text-primary)',
+                                border: '1px solid var(--color-border)',
+                                borderRadius: '4px',
+                                padding: '4px 8px',
+                                fontSize: 'var(--text-sm)',
+                                cursor: 'pointer',
+                                minWidth: '120px'
+                              }}
+                            >
+                              <option value="" style={{ backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-primary)' }}>-- None --</option>
+                              {setters.map(s => (
+                                <option key={s.id} value={s.id} style={{ backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-primary)' }}>{s.name}</option>
+                              ))}
+                            </select>
+                          </td>
+                        </tr>
+                        {isExpanded && (
+                          <tr key={`${call.id}-details`}>
+                            <td colSpan={10} style={{ padding: 0 }}>
+                              <div style={{
+                                backgroundColor: 'var(--color-bg-secondary)',
+                                padding: 'var(--space-4)',
+                                borderTop: '1px solid var(--color-border)',
+                                borderBottom: '1px solid var(--color-border)'
+                              }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
+                                  {/* Contact Info */}
+                                  <div>
+                                    <h4 style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-semibold)', marginBottom: 'var(--space-2)', color: 'var(--color-text-primary)' }}>
+                                      📞 Contact Details
+                                    </h4>
+                                    <div className="text-small" style={{ color: 'var(--color-text-muted)', lineHeight: '1.6' }}>
+                                      {call.lead_phone && <div><strong>Phone:</strong> {call.lead_phone}</div>}
+                                      {call.lead_email && <div><strong>Email:</strong> {call.lead_email}</div>}
+                                      {!call.lead_phone && !call.lead_email && <div>No contact details</div>}
+                                    </div>
+                                  </div>
+
+                                  {/* Marketing Info */}
+                                  <div>
+                                    <h4 style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-semibold)', marginBottom: 'var(--space-2)', color: 'var(--color-text-primary)' }}>
+                                      📊 Lead Source
+                                    </h4>
+                                    <div className="text-small" style={{ color: 'var(--color-text-muted)', lineHeight: '1.6' }}>
+                                      {call.lead_source && <div><strong>Source:</strong> {call.lead_source}</div>}
+                                      {call.medium && <div><strong>Medium:</strong> {call.medium}</div>}
+                                      {call.campaign && <div><strong>Campaign:</strong> {call.campaign}</div>}
+                                      {!call.lead_source && !call.medium && !call.campaign && <div>No lead source data</div>}
+                                    </div>
+                                  </div>
+
+                                  {/* Call Details */}
+                                  <div>
+                                    <h4 style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-semibold)', marginBottom: 'var(--space-2)', color: 'var(--color-text-primary)' }}>
+                                      💰 Financial Details
+                                    </h4>
+                                    <div className="text-small" style={{ color: 'var(--color-text-muted)', lineHeight: '1.6' }}>
+                                      <div><strong>Revenue:</strong> {formatCurrency(call.revenue)}</div>
+                                      <div><strong>Cash Collected (1):</strong> {formatCurrency(call.cash_collected)}</div>
+                                      <div><strong>Cash Collected (2):</strong> {formatCurrency(call.cash_collected_2)}</div>
+                                      <div><strong>Offer Made:</strong> {call.offer_made ? 'Yes' : 'No'}</div>
+                                    </div>
+                                  </div>
+
+                                  {/* Recording Link */}
+                                  <div>
+                                    <h4 style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-semibold)', marginBottom: 'var(--space-2)', color: 'var(--color-text-primary)' }}>
+                                      🎙️ Call Recording
+                                    </h4>
+                                    {call.call_recording_link ? (
+                                      <a
+                                        href={call.call_recording_link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          gap: 'var(--space-1)',
+                                          color: 'var(--color-accent)',
+                                          textDecoration: 'none',
+                                          fontSize: 'var(--text-sm)',
+                                          fontWeight: 'var(--font-medium)'
+                                        }}
+                                      >
+                                        View Recording <ExternalLink className="w-3 h-3" />
+                                      </a>
+                                    ) : (
+                                      <div className="text-small" style={{ color: 'var(--color-text-muted)' }}>No recording available</div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Notes */}
+                                {call.notes && (
+                                  <div style={{ marginTop: 'var(--space-4)', paddingTop: 'var(--space-4)', borderTop: '1px solid var(--color-border)' }}>
+                                    <h4 style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-semibold)', marginBottom: 'var(--space-2)', color: 'var(--color-text-primary)' }}>
+                                      📝 Notes
+                                    </h4>
+                                    <div className="text-small" style={{ color: 'var(--color-text-muted)', whiteSpace: 'pre-wrap' }}>
+                                      {call.notes}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
                         )}
-                      </td>
-                      <td>
-                        <span style={{
-                          padding: '2px 8px',
-                          borderRadius: '4px',
-                          fontSize: 'var(--text-xs)',
-                          fontWeight: 'var(--font-medium)',
-                          backgroundColor: call.result === 'Closed'
-                            ? 'rgba(16, 185, 129, 0.15)'
-                            : call.result === 'No Show'
-                              ? 'rgba(239, 68, 68, 0.15)'
-                              : 'rgba(59, 130, 246, 0.15)',
-                          color: call.result === 'Closed'
-                            ? '#10b981'
-                            : call.result === 'No Show'
-                              ? '#ef4444'
-                              : '#3b82f6'
-                        }}>
-                          {call.result || '-'}
-                        </span>
-                      </td>
-                      <td style={{ textAlign: 'right', fontWeight: 'var(--font-medium)' }}>
-                        {formatCurrency(call.revenue || 0)}
-                      </td>
-                      <td style={{ textAlign: 'right', fontWeight: 'var(--font-bold)', color: 'var(--color-accent)' }}>
-                        {formatCurrency((call.cash_collected || 0) + (call.cash_collected_2 || 0))}
-                      </td>
-                      <td style={{ textAlign: 'right', fontWeight: 'var(--font-medium)', color: 'var(--color-warning)' }}>
-                        {formatCurrency(getCommission(call))}
-                      </td>
-                      <td>
-                        <select
-                          value={call.closer_id || ''}
-                          onChange={(e) => {
-                            const selectedCloser = closers.find(c => c.id === e.target.value)
-                            handleUpdateAssignment(
-                              call.id,
-                              'closer',
-                              e.target.value || null,
-                              selectedCloser?.name || null
-                            )
-                          }}
-                          disabled={updatingId === call.id}
-                          style={{
-                            backgroundColor: 'var(--color-bg-secondary)',
-                            color: 'var(--color-text-primary)',
-                            border: '1px solid var(--color-border)',
-                            borderRadius: '4px',
-                            padding: '4px 8px',
-                            fontSize: 'var(--text-sm)',
-                            cursor: 'pointer',
-                            minWidth: '120px'
-                          }}
-                        >
-                          <option value="" style={{ backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-primary)' }}>-- None --</option>
-                          {closers.map(c => (
-                            <option key={c.id} value={c.id} style={{ backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-primary)' }}>{c.name}</option>
-                          ))}
-                        </select>
-                      </td>
-                      <td>
-                        <select
-                          value={call.setter_id || ''}
-                          onChange={(e) => {
-                            const selectedSetter = setters.find(s => s.id === e.target.value)
-                            handleUpdateAssignment(
-                              call.id,
-                              'setter',
-                              e.target.value || null,
-                              selectedSetter?.name || null
-                            )
-                          }}
-                          disabled={updatingId === call.id}
-                          style={{
-                            backgroundColor: 'var(--color-bg-secondary)',
-                            color: 'var(--color-text-primary)',
-                            border: '1px solid var(--color-border)',
-                            borderRadius: '4px',
-                            padding: '4px 8px',
-                            fontSize: 'var(--text-sm)',
-                            cursor: 'pointer',
-                            minWidth: '120px'
-                          }}
-                        >
-                          <option value="" style={{ backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-primary)' }}>-- None --</option>
-                          {setters.map(s => (
-                            <option key={s.id} value={s.id} style={{ backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-primary)' }}>{s.name}</option>
-                          ))}
-                        </select>
-                      </td>
-                    </tr>
-                  ))
+                      </>
+                    )
+                  })
                 )}
               </tbody>
             </table>

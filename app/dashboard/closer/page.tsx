@@ -201,6 +201,11 @@ export default function CloserDashboard() {
                   + Add Call
                 </Button>
               </Link>
+              <Link href="/submit-eod">
+                <Button className="btn btn-secondary">
+                  📋 EOD Form
+                </Button>
+              </Link>
               <ThemeToggle />
               <Button onClick={handleSignOut} className="btn btn-secondary">
                 <LogOut className="w-5 h-5" />
